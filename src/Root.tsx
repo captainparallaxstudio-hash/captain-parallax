@@ -1,15 +1,6 @@
-/**
+/*
  * CAPTAIN PARALLAX — "THE SHADOWS WEREN'T ATTACKING"
  * 1080x1920 · 30fps · 1350 frames (45s) · six isolated 225-frame Sequences
- *
- * 0   Rule 1 hook  — shadow peels off the floor, grabs the ankles
- * 225 Days of terror — people stomp / burn their shadows
- * 450 Realisation  — macro on the ankle grip, pull vector, rain stops on invisible bodies
- * 675 Rule 2       — straining forward toward the invisible things, yanked back
- * 900 Rule 3       — thermal goggles HUD, cold masses, a walker loses his heat
- * 1125 Rule 4      — shadow goes limp, crimson flash @1200 (0:40), cold masses are BEHIND him
- *
- * Imports: react + remotion only. No Math.random(), no external assets, every interpolate() clamped.
  */
 import React from 'react';
 import {
@@ -22,16 +13,14 @@ import {
   useVideoConfig,
 } from 'remotion';
 
-/* ───────────────────────── constants & deterministic helpers ───────────────────────── */
-
 const W = 1080;
 const H = 1920;
-const GY = 1040; // ground line where the hero's feet stand
+const GY = 1040;
 const FONT = "Impact, 'Arial Black', 'Helvetica Neue', Arial, sans-serif";
 
 const rand = (i: number) => {
   const x = Math.sin(i * 12.9898) * 43758.5453;
-  return x - Math.floor(x); // 0..1, identical every render
+  return x - Math.floor(x);
 };
 
 const ip = (f: number, i: number[], o: number[]) =>
@@ -50,7 +39,6 @@ const mixc = (a: RGB, b: RGB, t: number) => {
   )})`;
 };
 
-// streetlamp: slow breathing + stutters + rare full dropouts
 const flick = (f: number, seed: number) => {
   const base = 0.8 + 0.1 * Math.sin(f * 0.23 + seed) + 0.06 * Math.sin(f * 0.71 + seed * 2);
   const stutter = rand(Math.floor(f / 2) + seed * 17) > 0.9 ? 0.25 : 1;
@@ -64,8 +52,6 @@ const shakeXY = (f: number, amp: number) => ({
   r: (rand(f * 3.1 + 5) - 0.5) * amp * 0.06,
 });
 
-/* ───────────────────────── script (6 sentences, 83 words) ───────────────────────── */
-
 const LINES = [
   'Rule one: when your shadow tears loose from the floor, never fight it.',
   'For three days we stomped and burned them, believing they wanted us dead.',
@@ -74,8 +60,6 @@ const LINES = [
   'Rule three: through thermal goggles they glow cold, so never walk toward the cold.',
   'Rule four: when your shadow goes limp, don’t turn around, because they’re already behind you.',
 ];
-
-/* ───────────────────────── palettes ───────────────────────── */
 
 type Pal = {
   skin: string;
@@ -103,8 +87,6 @@ const thermalPal = (h: number): Pal => ({
   eye: '#ffffff',
   accent: mixc([255, 230, 120], [60, 120, 255], 1 - h),
 });
-
-/* ───────────────────────── subtitles (safe zone) ───────────────────────── */
 
 const Subtitle: React.FC<{text: string; f: number}> = ({text, f}) => {
   const words = text.split(' ');
@@ -134,7 +116,7 @@ const Subtitle: React.FC<{text: string; f: number}> = ({text, f}) => {
           lineHeight: 1.34,
           color: '#fff',
           textShadow: '0 4px 0 #000, 0 0 16px #000',
-        }}
+        } as React.CSSProperties}
       >
         {words.map((w, i) => (
           <span key={i} style={{color: i === idx ? '#ff3150' : '#ffffff'}}>
@@ -145,8 +127,6 @@ const Subtitle: React.FC<{text: string; f: number}> = ({text, f}) => {
     </div>
   );
 };
-
-/* ───────────────────────── scene shell (camera: zoom + shake) ───────────────────────── */
 
 const Shell: React.FC<{
   f: number;
@@ -172,8 +152,6 @@ const Shell: React.FC<{
     </AbsoluteFill>
   );
 };
-
-/* ───────────────────────── backdrop: night street / thermal street ───────────────────────── */
 
 const Backdrop: React.FC<{
   f: number;
@@ -323,8 +301,6 @@ const Backdrop: React.FC<{
   );
 };
 
-/* ───────────────────────── rain (stops on invisible bodies) ───────────────────────── */
-
 const Rain: React.FC<{f: number; n?: number; opacity?: number; blockers?: {x1: number; x2: number; top: number}[]}> = ({
   f,
   n = 70,
@@ -350,8 +326,6 @@ const Rain: React.FC<{f: number; n?: number; opacity?: number; blockers?: {x1: n
   }
   return <g>{out}</g>;
 };
-
-/* ───────────────────────── people ───────────────────────── */
 
 const arm = (a: number, b: number, l1 = 72, l2 = 66) => {
   const ra = (a * Math.PI) / 180;
@@ -394,7 +368,6 @@ type PersonProps = {
   rim?: boolean;
 };
 
-// Dark-anime figure. Local units: feet at (0,0), ~440 tall, faces +x.
 const Person: React.FC<PersonProps> = ({
   x,
   y,
@@ -426,15 +399,12 @@ const Person: React.FC<PersonProps> = ({
       transform={`translate(${x} ${y}) scale(${s * face} ${s}) rotate(${lean})`}
       style={rim && !sil ? {filter: `drop-shadow(5px -3px 4px ${pal.rim})`} : undefined}
     >
-      {/* back arm */}
       <path d={`M 0 ${SY} L ${ab.ex} ${SY + ab.ey} L ${ab.hx} ${SY + ab.hy}`} stroke={k(pal.jacket)} strokeWidth={19} strokeLinecap="round" strokeLinejoin="round" fill="none" opacity={sil ? 1 : 0.8} />
       <circle cx={ab.hx} cy={SY + ab.hy} r={8} fill={k(pal.skin)} />
-      {/* back leg */}
       <g transform={`translate(-9 0) rotate(${legB} 0 -196)`}>
         <path d="M -14 -196 L 14 -196 L 11 -104 L 12 -16 L -12 -16 L -11 -104 Z" fill={k(pal.pants)} />
         <path d="M -13 -16 L 12 -16 L 32 -5 L 32 0 L -14 0 Z" fill={k(pal.shoe)} />
       </g>
-      {/* torso / hoodie */}
       <path d="M -32 -334 C -40 -296 -34 -240 -28 -192 L 30 -192 C 36 -240 42 -296 34 -334 C 20 -344 -18 -344 -32 -334 Z" fill={k(pal.jacket)} />
       {!sil && (
         <g>
@@ -443,19 +413,16 @@ const Person: React.FC<PersonProps> = ({
           <path d="M -30 -330 C -12 -314 12 -314 32 -330" stroke="rgba(0,0,0,0.35)" strokeWidth={6} fill="none" />
         </g>
       )}
-      {/* front leg */}
       <g transform={`translate(9 0) rotate(${legF} 0 -196)`}>
         <path d="M -14 -196 L 14 -196 L 11 -104 L 12 -16 L -12 -16 L -11 -104 Z" fill={k(pal.pants)} />
         <path d="M -13 -16 L 12 -16 L 32 -5 L 32 0 L -14 0 Z" fill={k(pal.shoe)} />
         {!sil && <path d="M -12 -22 L 12 -22" stroke={pal.accent} strokeWidth={3} opacity={0.7} />}
       </g>
-      {/* neck + head */}
       <rect x={-8} y={-352} width={18} height={26} fill={k(pal.skin)} />
       <ellipse cx={3} cy={-376} rx={27} ry={31} fill={k(pal.skin)} />
       <path d="M -26 -378 C -34 -418 -4 -430 24 -414 C 34 -406 34 -392 30 -384 L 26 -398 L 18 -384 L 10 -402 L 2 -386 L -8 -404 L -14 -384 L -20 -396 L -26 -378 Z" fill={k(pal.hair)} />
       <path d="M -26 -380 L -54 -372 L -34 -366 L -60 -350 L -30 -352 Z" fill={k(pal.hair)} />
       {!sil && <path d="M 4 -424 L 22 -410" stroke={pal.rim} strokeWidth={2.4} opacity={0.8} strokeLinecap="round" />}
-      {/* face */}
       {!sil && (
         <g>
           <path d={`M 4 ${-392 - brow * 5} L 26 ${-388 + brow * 3}`} stroke="#0a0814" strokeWidth={3} strokeLinecap="round" />
@@ -477,7 +444,6 @@ const Person: React.FC<PersonProps> = ({
       {sil && glow > 0.02 && (
         <ellipse cx={15} cy={-378} rx={10} ry={3.6 * glow} fill="#e6d8ff" opacity={glow} style={{filter: 'drop-shadow(0 0 6px #b48cff)'}} />
       )}
-      {/* front arm (+ optional torch) */}
       {torch !== undefined && (
         <g>
           <path d={`M ${af.hx} ${SY + af.hy} L ${af.hx + dirX * 74} ${SY + af.hy + dirY * 74}`} stroke="#2a1a10" strokeWidth={9} strokeLinecap="round" />
@@ -490,7 +456,6 @@ const Person: React.FC<PersonProps> = ({
   );
 };
 
-/* point on a rotated/flattened shadow silhouette, and ankle position of a leg */
 const shadowPt = (px: number, py: number, s: number, a: number, fy: number, lx: number, ly: number): [number, number] => {
   const r = (a * Math.PI) / 180;
   const xr = lx * Math.cos(r) - ly * Math.sin(r);
@@ -567,7 +532,6 @@ type PairProps = {
   torch?: number;
 };
 
-// A person + their detached shadow gripping both ankles
 const Pair: React.FC<PairProps> = (p) => {
   const {x, y, s, f, pal, grip = 1, a = 90, limp = 0, lift = 40} = p;
   const ssh = s * 0.9;
@@ -600,8 +564,6 @@ const Pair: React.FC<PairProps> = (p) => {
     </g>
   );
 };
-
-/* ───────────────────────── the invisible things (clues only show when the lamp stutters) ───────────────────────── */
 
 const Invisible: React.FC<{
   x: number;
@@ -646,8 +608,6 @@ const Invisible: React.FC<{
     </g>
   );
 };
-
-/* ───────────────────────── overlays ───────────────────────── */
 
 const RuleTag: React.FC<{n: string; sub: string; f: number; col?: string}> = ({n, sub, f, col = '#ff2a45'}) => {
   const g = rand(Math.floor(f / 2) + n.charCodeAt(1)) > 0.82 ? 7 : 0;
@@ -720,11 +680,9 @@ const Arrow: React.FC<{x1: number; y1: number; x2: number; y2: number; col: stri
   );
 };
 
-/* ───────────────────────── SCENE 1 — Rule 1 hook (frames 0–224) ───────────────────────── */
-
 const Scene1: React.FC = () => {
   const f = useCurrentFrame();
-  const hint = flick(f, 3) < 0.3 ? 0.5 : 0.05; // the invisible things only show when the lamp stutters
+  const hint = flick(f, 3) < 0.3 ? 0.5 : 0.05;
   const hs = 1.3;
   const ssh = hs * 0.9;
   const hx = 620 - sm(f, 128, 225) * 70;
@@ -764,8 +722,6 @@ const Scene1: React.FC = () => {
   );
 };
 
-/* ───────────────────────── SCENE 2 — three days of terror (frames 225–449) ───────────────────────── */
-
 const Scene2: React.FC = () => {
   const f = useCurrentFrame();
   const mood = ip(f, [0, 225], [0, 0.65]);
@@ -785,9 +741,7 @@ const Scene2: React.FC = () => {
         <Backdrop f={f} seed={5} mood={mood} />
         <Invisible x={450} y={GY - 36} s={1.0} f={f} vis={hint} seed={3} />
         <Invisible x={850} y={GY + 4} s={1.3} f={f} vis={hint} seed={4} />
-        {/* A — torch against his own shadow */}
         <Pair x={250} y={GY - 30} s={1.0} f={f} pal={PAL_A} lift={60} armF={[150 + Math.sin(f * 0.5) * 20, 20]} armB={[-40, 30]} torch={f} eye={1.5} mouth={0.8} brow={1} />
-        {/* hero — stomping */}
         <Pair
           x={600}
           y={GY}
@@ -803,7 +757,6 @@ const Scene2: React.FC = () => {
           brow={1}
           sweat
         />
-        {/* C — running, dragged back */}
         <Pair x={880 + Math.sin(f * 0.4) * 8} y={GY - 20} s={0.95} f={f} pal={PAL_C} lean={12} lift={60} legF={run * 35} legB={-run * 35} armF={[-50 + run * 30, 40]} armB={[50 - run * 30, 30]} eye={1.6} mouth={1} brow={1} />
         <g>{embers}</g>
         <circle cx={250} cy={GY - 560} r={260} fill={`rgba(255,120,40,${0.1 + 0.05 * Math.sin(f * 0.9)})`} />
@@ -814,8 +767,6 @@ const Scene2: React.FC = () => {
     </>
   );
 };
-
-/* ───────────────────────── SCENE 3 — the realisation (frames 450–674) ───────────────────────── */
 
 const EyeInset: React.FC<{f: number}> = ({f}) => {
   const cx = 790;
@@ -875,7 +826,7 @@ const Scene3: React.FC = () => {
       )}
       {f >= 150 && (
         <g opacity={ip(f, [150, 164], [0, 1])}>
-          <Brackets cx={820} cy={760} r={190} col="#00e5ff" f={f} label="COLD MASS ×3" />
+          <Brackets cx={820} cy={760} r={190} col="#00e5ff" f={f} label="COLD MASS x3" />
         </g>
       )}
       <EyeInset f={f} />
@@ -895,8 +846,6 @@ const Scene3: React.FC = () => {
     </>
   );
 };
-
-/* ───────────────────────── SCENE 4 — Rule 2: never pull free (frames 675–899) ───────────────────────── */
 
 const Scene4: React.FC = () => {
   const f = useCurrentFrame();
@@ -943,8 +892,6 @@ const Scene4: React.FC = () => {
   );
 };
 
-/* ───────────────────────── SCENE 5 — Rule 3: thermal goggles (frames 900–1124) ───────────────────────── */
-
 const ThermalHUD: React.FC<{f: number; h: number; wx: number; dist: number}> = ({f, h, wx, dist}) => {
   const danger = dist < 12;
   const blink = Math.floor(f / 6) % 2 === 0;
@@ -981,8 +928,8 @@ const ThermalHUD: React.FC<{f: number; h: number; wx: number; dist: number}> = (
         <path d="M 980 1840 H 1040 V 1790" />
       </g>
       <g fontFamily="monospace" fontWeight={700} fontSize={30} fill="#00ffb3">
-        <text x={64} y={470}>THERMAL // IR 8–14µm</text>
-        <text x={64} y={510}>COLD MASS ×3  −4°C</text>
+        <text x={64} y={470}>THERMAL // IR 8-14um</text>
+        <text x={64} y={510}>COLD MASS x3  -4C</text>
         <text x={64} y={550} fill={danger && blink ? '#ff2a45' : '#00ffb3'}>DIST {String(dist).padStart(2, '0')} m</text>
       </g>
       <rect x={64} y={600} width={26} height={240} fill="url(#heatBar)" />
@@ -994,7 +941,7 @@ const ThermalHUD: React.FC<{f: number; h: number; wx: number; dist: number}> = (
         <path d="M -130 0 H -80 M 80 0 H 130 M 0 -130 V -80 M 0 80 V 130" />
       </g>
       <text x={wx} y={440} fontFamily="monospace" fontWeight={700} fontSize={30} fill="#ffe08a" textAnchor="middle">
-        {h < 0.2 ? (blink ? 'SIGNATURE LOST' : '') : `${sig}°C`}
+        {h < 0.2 ? (blink ? 'SIGNATURE LOST' : '') : `${sig}C`}
       </text>
       {danger && blink && (
         <text x={540} y={1100} fontFamily={FONT} fontWeight={900} fontSize={60} fill="#ff2a45" textAnchor="middle" letterSpacing={4}>
@@ -1027,8 +974,6 @@ const Scene5: React.FC = () => {
     </>
   );
 };
-
-/* ───────────────────────── SCENE 6 — Rule 4 twist (frames 1125–1349; crimson climax at local 75 = frame 1200 = 0:40.0) ───────────────────────── */
 
 const Scene6: React.FC = () => {
   const f = useCurrentFrame();
@@ -1063,18 +1008,15 @@ const Scene6: React.FC = () => {
               </radialGradient>
             </defs>
             <rect x={0} y={0} width={W} height={H} fill="url(#redVig)" opacity={hit ? 1 : 0.35} />
-            {hit && <RuleTag n="04" sub="DON’T TURN AROUND" f={f} />}
+            {hit && <RuleTag n="04" sub="DON'T TURN AROUND" f={f} />}
           </g>
         }
       >
         <Backdrop f={f} seed={13} lamp={lamp} mood={hit ? 0.7 : 0} />
-        {/* distant citizens: every shadow goes limp together */}
         <Pair x={300} y={GY - 140} s={0.55} f={f} pal={PAL_A} limp={limp} lift={10} eye={0.9} />
         <Pair x={900} y={GY - 130} s={0.55} f={f} pal={PAL_C} limp={limp} lift={10} eye={0.9} />
-        {/* the things that were in front fade out… */}
         <Invisible x={820} y={GY + 4} s={1.3} f={f} vis={0.45 * front} seed={1} />
         <Invisible x={925} y={GY - 16} s={1.12} f={f} vis={0.35 * front} seed={2} />
-        {/* …and now stand BEHIND him */}
         <Invisible x={250} y={GY - 12} s={1.2} f={f} vis={0.75 * behind} seed={5} face={1} reach={0.4 * behind} {...red} />
         <Invisible x={470} y={GY + 6} s={1.4} f={f} vis={0.95 * behind} seed={6} face={1} reach={0.7 * behind} {...red} />
         <Pair
@@ -1098,8 +1040,6 @@ const Scene6: React.FC = () => {
     </>
   );
 };
-
-/* ───────────────────────── composition ───────────────────────── */
 
 const HorrorShort: React.FC = () => (
   <AbsoluteFill style={{backgroundColor: '#000'}}>
