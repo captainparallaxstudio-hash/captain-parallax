@@ -1066,6 +1066,6 @@ const HorrorShort: React.FC = () => (
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition id="HorrorShort" component={HorrorShort} width={1080} height={1920} fps={30} durationInFrames={1350} />
+    <Composition id="MainComp" component={HorrorShort} width={1080} height={1920} fps={30} durationInFrames={1350} />
   </>
 );
